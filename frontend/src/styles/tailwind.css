@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-apple-gray text-apple-dark font-sans;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg transition-all duration-300 font-medium focus:outline-none;
+  }
+  
+  .btn-primary {
+    @apply btn bg-apple-blue text-white hover:bg-opacity-90 hover:shadow-apple-hover;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-white text-apple-dark border border-gray-300 hover:bg-gray-100 hover:shadow-apple-hover;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-apple p-4 transition-shadow duration-300 hover:shadow-apple-hover;
+  }
+  
+  .glass-effect {
+    @apply bg-white bg-opacity-70 backdrop-blur-lg;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+.loading-shimmer {
+  animation: shimmer 1.5s infinite linear;
+  background: linear-gradient(to right, #f6f6f6 8%, #f0f0f0 18%, #f6f6f6 33%);
+  background-size: 800px 104px;
+}
