@@ -7,12 +7,13 @@ from datetime import datetime
 class DonorBase(BaseModel):
     name: str
     blood_type: str
+    age: int
     organ: str
     location: str | None = None
     status: str = "available"
 
 class DonorCreate(DonorBase):
-    pass
+    pass  # no need to repeat fields
 
 class Donor(DonorBase):
     id: int
@@ -47,5 +48,6 @@ class AllocationLog(BaseModel):
     recipient_id: int
     match_score: int
     timestamp: datetime
+
     class Config:
         from_attributes = True

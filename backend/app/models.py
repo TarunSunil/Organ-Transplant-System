@@ -6,9 +6,12 @@ class Donor(Base):
     __tablename__ = "donors"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    blood_type = Column(String, nullable=False)
-    organ = Column(String, nullable=False)
+    name = Column(String, index=True)
+    blood_type = Column(String, index=True)
+    age = Column(Integer)
+    location = Column(String, nullable=True)  # ✅ add this line
+    organ = Column(String, index=True)
+    status = Column(String, default="available")
 class Recipient(Base):
     __tablename__ = "recipients"
     id = Column(Integer, primary_key=True, index=True)
