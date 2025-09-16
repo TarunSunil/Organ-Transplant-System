@@ -1,13 +1,24 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from .. import crud, schemas, database
+from app import models, schemas, database
 
-router = APIRouter(prefix="/donors", tags=["donors"])
+router = APIRouter()
+
+def get_db():
+    db = database.SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 @router.post("/", response_model=schemas.Donor)
-def create_donor(donor: schemas.DonorCreate, db: Session = Depends(database.get_db)):
-    return crud.create_donor(db=db, donor=donor)
+def create_donor(donor: schemas.DonorCreate, db: Session = Depends(get_db)):
+    db_donor = models.Donor(**donor.model_dump())
+    db.add(db_donor)
+    db.commit()
+    db.refresh(db_donor)
+    return db_donor
 
 @router.get("/", response_model=list[schemas.Donor])
-def list_donors(skip: int = 0, limit: int = 10, db: Session = Depends(database.get_db)):
-    return crud.get_donors(db, skip=skip, limit=limit)
+def get_donors(db: Session = Depends(get_db)):
+    return db.query(models.Donor).all()
