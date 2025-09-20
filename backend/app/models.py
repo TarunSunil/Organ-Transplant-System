@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from app.database import Base
+from .database import Base
 
 
 class Donor(Base):
@@ -17,11 +17,9 @@ class Recipient(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     blood_type = Column(String, nullable=False)
-    organ_needed = Column(String, nullable=False)   # 👈 important
-    urgency_level = Column(Integer, default=1)
+    organ_needed = Column(String, nullable=False)
     location = Column(String, nullable=True)
     status = Column(String, default="waiting")
-    age = Column(Integer, nullable=True)
 
 class AllocationLog(Base):
     __tablename__ = "allocation_logs"

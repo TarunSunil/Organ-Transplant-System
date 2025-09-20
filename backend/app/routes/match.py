@@ -1,19 +1,28 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
-from app import models, schemas, database
+from .. import models, database
 import google.generativeai as genai
 import os
 import json
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
-load_dotenv()  # loads variables from .env
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+# Load .env (searches upward) so you can keep .env at project root
+load_dotenv(find_dotenv())
+API_KEY = os.getenv("GOOGLE_API_KEY")
+AI_ENABLED = bool(API_KEY)
+if AI_ENABLED:
+    try:
+        genai.configure(api_key=API_KEY)
+        MODEL = genai.GenerativeModel("gemini-1.5-flash")
+    except Exception as e:
+        # Fallback: disable AI if configuration fails
+        AI_ENABLED = False
+        MODEL = None
+else:
+    MODEL = None
 
 router = APIRouter()
-
-# Setup Gemini with API Key (set it in your environment variables)
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 def get_db():
     db = database.SessionLocal()
@@ -26,6 +35,9 @@ MATCH_THRESHOLD = 70  # Adjust threshold as needed
 
 @router.post("/ai-match/{donor_id}")
 def ai_match_donor(donor_id: int, db: Session = Depends(get_db)):
+    if not AI_ENABLED:
+        raise HTTPException(status_code=503, detail="AI matching disabled (missing or invalid GOOGLE_API_KEY)")
+
     donor = db.query(models.Donor).filter(models.Donor.id == donor_id).first()
     if not donor:
         raise HTTPException(status_code=404, detail="Donor not found")
@@ -39,8 +51,6 @@ def ai_match_donor(donor_id: int, db: Session = Depends(get_db)):
     best_match = None
     best_score = -1
     best_ai_output = None
-
-    model = genai.GenerativeModel("gemini-1.5-flash")
 
     for recipient in recipients:
         prompt = f"""
@@ -68,12 +78,15 @@ def ai_match_donor(donor_id: int, db: Session = Depends(get_db)):
         }}
         """
 
-        response = model.generate_content(prompt)
         try:
-            ai_output = json.loads(response.text.strip().replace("```json", "").replace("```", "").strip())
-            score = ai_output.get("match_score", 0)
+            response = MODEL.generate_content(prompt)
+            ai_text = response.text.strip() if hasattr(response, "text") else ""
+            cleaned = ai_text.replace("```json", "").replace("```", "").strip()
+            ai_output = json.loads(cleaned)
+            score = int(ai_output.get("match_score", 0))
         except Exception:
-            continue  # skip if AI output is invalid
+            # Skip malformed or failed AI responses silently for now.
+            continue
 
         if score > best_score:
             best_score = score
@@ -81,7 +94,6 @@ def ai_match_donor(donor_id: int, db: Session = Depends(get_db)):
             best_ai_output = ai_output
 
     if best_score >= MATCH_THRESHOLD and best_match:
-        # Allocate
         donor.status = "allocated"
         best_match.status = "matched"
         log = models.AllocationLog(
@@ -93,15 +105,6 @@ def ai_match_donor(donor_id: int, db: Session = Depends(get_db)):
         db.add(log)
         db.commit()
         db.refresh(log)
+        return {"donor": donor.name, "recipient": best_match.name, "ai_match": best_ai_output}
 
-        return {
-            "donor": donor.name,
-            "recipient": best_match.name,
-            "ai_match": best_ai_output
-        }
-
-    return {
-        "donor": donor.name,
-        "recipient": None,
-        "ai_match": "No suitable match found above threshold."
-    }
+    return {"donor": donor.name, "recipient": None, "ai_match": "No suitable match found above threshold."}

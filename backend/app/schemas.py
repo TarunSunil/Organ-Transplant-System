@@ -27,7 +27,6 @@ class RecipientBase(BaseModel):
     name: str
     blood_type: str
     organ_needed: str
-    urgency_level: int = 1
     location: str | None = None
     status: str = "waiting"
 

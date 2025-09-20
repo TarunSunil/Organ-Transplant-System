@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app import models, database
-from app.routes import donors, recipients, match, logs
+from . import models, database
+from .routes import donors, recipients, match, logs
 
 app = FastAPI(title="Organ Transplant System")
 
