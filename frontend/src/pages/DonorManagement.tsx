@@ -3,8 +3,8 @@ import Navbar from '../components/common/Navbar';
 import Sidebar from '../components/common/Sidebar';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
-import { donorService } from '../services/api';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 
 interface Donor {
   id: number;
@@ -30,38 +30,23 @@ const DonorManagement: React.FC = () => {
     status: 'available'
   });
 
-  // Blood type options
   const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   const organs = ['kidney', 'liver', 'heart', 'lung', 'pancreas', 'intestine'];
 
+  // Fetch donors from backend
   useEffect(() => {
-    // We'll use mock data for now
-    const mockDonors: Donor[] = [
-      { id: 1, name: 'John Doe', blood_type: 'A+', age: 45, location: 'New York', organ: 'kidney', status: 'available' },
-      { id: 2, name: 'Jane Smith', blood_type: 'O-', age: 36, location: 'Los Angeles', organ: 'liver', status: 'available' },
-      { id: 3, name: 'Robert Johnson', blood_type: 'B+', age: 52, location: 'Chicago', organ: 'heart', status: 'processing' },
-      { id: 4, name: 'Sarah Williams', blood_type: 'AB+', age: 29, location: 'Boston', organ: 'lung', status: 'available' },
-    ];
-    
-    // Simulate API call
-    setTimeout(() => {
-      setDonors(mockDonors);
-      setIsLoading(false);
-    }, 1000);
-    
-    // In a real app, we'd fetch from API
-    // const fetchDonors = async () => {
-    //   try {
-    //     setIsLoading(true);
-    //     const data = await donorService.getAll();
-    //     setDonors(data);
-    //   } catch (error) {
-    //     console.error('Error fetching donors:', error);
-    //   } finally {
-    //     setIsLoading(false);
-    //   }
-    // };
-    // fetchDonors();
+    const fetchDonors = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axios.get<Donor[]>('http://localhost:8000/donors/');
+        setDonors(response.data);
+      } catch (error) {
+        console.error('Error fetching donors:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDonors();
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -74,25 +59,14 @@ const DonorManagement: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // In a real app, we'd call the API
-    // try {
-    //   const newDonor = await donorService.create(formData);
-    //   setDonors([...donors, newDonor]);
-    //   setShowForm(false);
-    //   setFormData({ name: '', blood_type: 'A+', age: 30, location: '', organ: 'kidney', status: 'available' });
-    // } catch (error) {
-    //   console.error('Error creating donor:', error);
-    // }
-    
-    // For demo, just add to the array
-    const newDonor = {
-      id: donors.length + 1,
-      ...formData
-    };
-    setDonors([...donors, newDonor]);
-    setShowForm(false);
-    setFormData({ name: '', blood_type: 'A+', age: 30, location: '', organ: 'kidney', status: 'available' });
+    try {
+      const response = await axios.post<Donor>('http://localhost:8000/donors/', formData);
+      setDonors([...donors, response.data]);
+      setShowForm(false);
+      setFormData({ name: '', blood_type: 'A+', age: 30, location: '', organ: 'kidney', status: 'available' });
+    } catch (error) {
+      console.error('Error creating donor:', error);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -116,21 +90,13 @@ const DonorManagement: React.FC = () => {
         <main className="flex-1 p-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-semibold">Donor Management</h1>
-            <Button 
-              onClick={() => setShowForm(!showForm)}
-              className="flex items-center gap-2"
-            >
+            <Button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2">
               {showForm ? 'Cancel' : '+ Add Donor'}
             </Button>
           </div>
-          
-          {/* Add Donor Form */}
+
           {showForm && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6"
-            >
+            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
               <Card>
                 <h2 className="text-xl font-semibold mb-4">Add New Donor</h2>
                 <form onSubmit={handleSubmit}>
@@ -201,8 +167,7 @@ const DonorManagement: React.FC = () => {
               </Card>
             </motion.div>
           )}
-          
-          {/* Donors List */}
+
           <Card>
             {isLoading ? (
               <div className="flex justify-center items-center h-64">
@@ -213,23 +178,24 @@ const DonorManagement: React.FC = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead>
                     <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blood Type</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organ</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {donors.map((donor, index) => (
+                    {donors.map((donor) => (
                       <motion.tr 
                         key={donor.id}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ duration: 0.3, delay: index * 0.05 }}
+                        transition={{ duration: 0.3 }}
                       >
+                        <td className="px-6 py-4 whitespace-nowrap">{donor.id}</td>
                         <td className="px-6 py-4 whitespace-nowrap">{donor.name}</td>
                         <td className="px-6 py-4 whitespace-nowrap">{donor.blood_type}</td>
                         <td className="px-6 py-4 whitespace-nowrap">{donor.age}</td>
@@ -239,10 +205,6 @@ const DonorManagement: React.FC = () => {
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(donor.status)}`}>
                             {donor.status.charAt(0).toUpperCase() + donor.status.slice(1)}
                           </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <Button variant="secondary" className="mr-2 py-1 px-2 text-sm">Edit</Button>
-                          <Button variant="secondary" className="py-1 px-2 text-sm">Find Match</Button>
                         </td>
                       </motion.tr>
                     ))}
