@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Navbar from '../components/common/Navbar';
 import Sidebar from '../components/common/Sidebar';
 import Card from '../components/common/Card';
 import { motion } from 'framer-motion';
@@ -23,7 +22,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-apple-gray">
-      <Navbar />
       <div className="flex">
         <Sidebar activeMenu={activeMenu} onMenuSelect={setActiveMenu} />
         <main className="flex-1 p-6">

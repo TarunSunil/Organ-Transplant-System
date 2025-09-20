@@ -1,0 +1,111 @@
+
+# Project Progress Log — Organ-Transplant-System
+
+This file is a structured, appendable progress log. Each entry is date-stamped and lists the files changed, a short description of the change, commands run, and the current status. Use the "Entry template" at the top to add future updates so the log stays consistent and uncluttered.
+
+---
+
+## Entry template (use this exact format when adding new updates)
+
+Date: YYYY-MM-DD
+Author: <your name>
+Type: (Added | Modified | Fixed | Removed | Run)
+Files:
+- path/to/file — one-line purpose or summary of change
+Commands run:
+- command  # short note about why
+Notes:
+- Any additional context, warnings, or follow-ups
+Status: (Working | Needs follow-up | Blocked)
+
+---
+
+## Log of changes (chronological)
+
+Date: 2025-09-16
+Author: automated-assistant
+Type: Added / Modified
+Files:
+- frontend-architecture.txt — New file: front-end architecture and feature list (Apple-inspired UI, components, stacks, system architecture).
+- frontend-implementation-guide.txt — New file: step-by-step frontend implementation guide and recommended stack, Tailwind & Framer Motion setup.
+- frontend/package.json — Replaced minimal file with full CRA-like package manifest (dependencies & scripts added for React, Tailwind, Framer Motion, etc.).
+- frontend/tailwind.config.js — Added Tailwind configuration with Apple-inspired tokens (colors, fonts, shadows).
+- frontend/postcss.config.js — Added postcss config (tailwind + autoprefixer plugin list).
+- frontend/tsconfig.json — Added TypeScript config for React project.
+- frontend/src/styles/tailwind.css — Added Tailwind entry and custom components/utilities (buttons, cards, glass effect, shimmer).
+- frontend/public/index.html — Added React app entry HTML.
+- frontend/public/manifest.json — Added PWA manifest file.
+- frontend/src/index.tsx — Added app bootstrap file.
+- frontend/src/reportWebVitals.ts — Added performance reporting helper.
+- frontend/src/App.tsx — Added React Router wiring for pages (Dashboard, DonorManagement).
+- frontend/src/pages/Dashboard.tsx — New Dashboard page with mock stats and recent matches (uses Framer Motion for animations).
+- frontend/src/pages/DonorManagement.tsx — New Donor Management page with mock data, add-donor form, and table listing.
+- frontend/src/services/api.ts — API service for donors, recipients, matching and logs (axios wrapper, baseURL set to FastAPI server).
+- frontend/src/components/common/Button.tsx — Reusable Button component (variant-based) (note: reverted direct usage in one place later to avoid prop typing issues).
+- frontend/src/components/common/Card.tsx — Reusable Card component.
+- frontend/src/components/common/Navbar.tsx — Top navigation component with frosted glass effect.
+- created directories: frontend/src/components, frontend/src/components/common, frontend/src/components/dashboard, frontend/src/pages, frontend/src/services
+
+Commands run (local dev):
+- npm install  (ran in `frontend` to install dependencies listed in `frontend/package.json`)
+- npm start    (started React dev server; server compiled with warnings and one TypeScript error which was fixed)
+
+Notes:
+- The frontend was scaffolded in-place (the `frontend` folder already contained a minimal structure). I updated and filled it out rather than re-creating the project to avoid overwriting existing files.
+- While implementing pages I used mock data for immediate UI feedback. The API service (`frontend/src/services/api.ts`) is connected to `http://127.0.0.1:8000` by default — update if your FastAPI runs elsewhere.
+- A TypeScript prop error was found at runtime: `Button` was used with a `type` prop which our `ButtonProps` type did not accept. I replaced the single problematic usage with a native `<button type="submit">` to unblock the dev server quickly. Keep the `Button` component for other uses or extend its props to include `type` if preferred.
+
+Status: Frontend dev server running (compiled with warnings). Backend FastAPI server was already running separately at `http://127.0.0.1:8000` during development.
+
+---
+
+Date: 2025-09-16
+Author: automated-assistant
+Type: Added
+Files:
+- frontend-architecture.txt — high-level design and features (created to capture UI/UX and technical choices).
+- frontend-implementation-guide.txt — implementation steps, commands and recommended libraries.
+
+Commands run:
+- none (documentation files created only)
+
+Notes:
+- These files were created early to capture the UI vision (Apple-like aesthetic), component breakdown, and stack choices.
+
+Status: Documentation files added.
+
+---
+
+Date: 2025-09-16
+Author: automated-assistant
+Type: Run
+Files:
+- (runtime) Node/npm — installed dependencies for frontend in `frontend` folder (created node_modules and package-lock.json)
+
+Commands run:
+- cd frontend; npm install
+- cd frontend; npm start
+
+Notes:
+- The dev server produced deprecation warnings from webpack-dev-server (non-blocking). There was one TypeScript prop error that was fixed by replacing a `Button` usage with a native `button` element.
+
+Status: Frontend dev server running on the local machine (usually http://localhost:3000). See terminal for warnings.
+
+---
+
+## How future updates should be added
+
+1. Copy the "Entry template" block near the top and fill it in with the new date, your name, and the change details.
+2. Add the new entry to the top of this file (so newest entries remain first) to keep the log chronological and easy to scan.
+3. Use one line per file changed, with a short description so the file stays readable.
+
+## Current quick status checklist
+
+- Frontend files scaffolded and running: Yes (dev server started, compiled with warnings)
+- Backend (FastAPI): Separate; user previously confirmed it runs at http://127.0.0.1:8000
+- DB (Postgres): User previously created `organ_db` via psql; ensure DB credentials in `backend/app/database.py` are correct if you hit connection issues.
+
+---
+
+If you want, I can also: (a) extend the `Button` props so it accepts `type` and other native attributes, (b) add the missing `Sidebar` component file (it was referenced by pages but not created), or (c) wire live API endpoints to replace mock data.
+

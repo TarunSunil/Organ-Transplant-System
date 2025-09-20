@@ -60,6 +60,10 @@ export const recipientService = {
 
 // Matching endpoints
 export const matchService = {
+  getAiMatch: async (donorId: number, recipientId: number) => {
+    const response = await api.post(`/ai-match?donor_id=${donorId}&recipient_id=${recipientId}`);
+    return response.data;
+  },
   findMatches: async (donorId: number) => {
     const response = await api.get(`/match/${donorId}`);
     return response.data;

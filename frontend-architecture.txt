@@ -1,0 +1,211 @@
+# Organ Transplant System - Frontend Architecture
+
+## Design Philosophy
+The frontend will follow Apple's design principles with a focus on:
+- Clean, minimalist interfaces with ample white space
+- Subtle animations for state transitions and user feedback
+- Consistent typography with San Francisco or similar font
+- Soft, sophisticated color palette with medical accents
+- Card-based UI components with subtle shadows
+- Frosted glass effects for overlays and modals
+
+## Core Features
+
+### 1. Central Dashboard
+**Purpose:** Command center for transplant coordinators
+**Key Elements:**
+- Real-time status cards showing available organs, urgent recipients
+- Key performance metrics (successful matches, average transport time)
+- Activity timeline showing recent/upcoming transplant activities
+- Notification center with color-coded priority levels
+**Apple-inspired Elements:** Widgets similar to macOS dashboard with glanceable information
+
+### 2. Matching Interface
+**Purpose:** Visualize and manage donor-recipient matching
+**Key Elements:**
+- Interactive matching score visualization
+- Side-by-side comparison of donor and potential recipients
+- Match quality indicators with explainable AI components
+- One-click match confirmation with animated transitions
+**Apple-inspired Elements:** Fluid animations between states, minimal UI with focus on decision points
+
+### 3. Geographic Visualization
+**Purpose:** Track organ transport and visualize logistics
+**Key Elements:**
+- Leaflet.js map with Apple Maps aesthetic
+- Animated transport routes with ETA and status indicators
+- Hospital/facility markers with capacity information
+- Weather/traffic overlay to anticipate logistics challenges
+**Apple-inspired Elements:** 3D perspective maps, smooth zooming and panning
+
+### 4. Allocation Log & Audit Trail
+**Purpose:** Transparent record of allocation decisions
+**Key Elements:**
+- Time-based visualization of allocation history
+- Searchable/filterable log entries
+- Detailed view of match criteria for each allocation
+- Export functionality for reporting
+**Apple-inspired Elements:** Timeline interface similar to Time Machine
+
+### 5. Patient/Donor Profiles
+**Purpose:** Comprehensive view of all relevant medical data
+**Key Elements:**
+- Medical attribute cards with visual indicators for key factors
+- Compatibility visualization with other donors/recipients
+- Status history with timeline
+- Anonymized view option for ethical review
+**Apple-inspired Elements:** Health app-inspired data visualization, clean medical iconography
+
+### 6. Mobile Companion App
+**Purpose:** Allow quick decisions and notifications for medical staff on the move
+**Key Elements:**
+- Push notifications for time-sensitive matches
+- Quick approval/review workflows
+- Location-aware transport updates
+- Simplified dashboard view
+**Apple-inspired Elements:** iOS design language, haptic feedback
+
+## Technical Implementation
+
+### Frontend Stack:
+- **React** with TypeScript for component architecture
+- **Tailwind CSS** with custom design system for Apple-inspired UI
+- **Framer Motion** for fluid animations and transitions
+- **React Query** for efficient data fetching and caching
+- **Redux Toolkit** for global state management
+- **Leaflet.js** with custom tiles for mapping functionality
+- **Recharts/D3.js** for data visualization
+- **Socket.io** client for real-time updates
+
+### Responsive Design Strategy:
+- Mobile-first approach with progressive enhancement
+- Adaptive layouts for different screen sizes
+- Touch-optimized for tablet use in clinical settings
+
+### Performance Optimization:
+- Component code-splitting
+- Image optimization and lazy loading
+- Memoized components to prevent unnecessary re-renders
+- Service workers for offline capabilities
+
+## User Experience Enhancements
+
+### Animations and Transitions:
+- Subtle fade transitions between pages
+- Progress animations for transport tracking
+- Micro-interactions for user feedback
+- Skeleton loading states with Apple-like shimmer effects
+
+### Accessibility Features:
+- High contrast mode for medical environments
+- Screen reader optimization
+- Keyboard navigation for efficient use
+- Adjustable text size
+
+### Dark/Light Mode:
+- Context-aware theming (dark mode at night)
+- Custom color palettes for both modes
+- System preference detection
+
+## Project Architecture
+
+```
+frontend/
+├── public/
+├── src/
+│   ├── assets/
+│   │   ├── icons/
+│   │   └── images/
+│   ├── components/
+│   │   ├── common/
+│   │   │   ├── Button/
+│   │   │   ├── Card/
+│   │   │   ├── Modal/
+│   │   │   └── Navigation/
+│   │   ├── dashboard/
+│   │   ├── matching/
+│   │   ├── maps/
+│   │   ├── logs/
+│   │   └── profiles/
+│   ├── contexts/
+│   │   ├── AuthContext.tsx
+│   │   └── ThemeContext.tsx
+│   ├── hooks/
+│   │   ├── useMatchScore.ts
+│   │   ├── useRealTimeUpdates.ts
+│   │   └── useTransportTracking.ts
+│   ├── pages/
+│   │   ├── Dashboard.tsx
+│   │   ├── MatchingCenter.tsx
+│   │   ├── TransportTracking.tsx
+│   │   ├── AllocationLogs.tsx
+│   │   └── Settings.tsx
+│   ├── services/
+│   │   ├── api.ts
+│   │   ├── socket.ts
+│   │   └── storage.ts
+│   ├── store/
+│   │   ├── slices/
+│   │   └── index.ts
+│   ├── styles/
+│   │   ├── tailwind.css
+│   │   └── animations.css
+│   ├── types/
+│   ├── utils/
+│   ├── App.tsx
+│   └── index.tsx
+├── tailwind.config.js
+├── package.json
+└── tsconfig.json
+```
+
+## Complete System Architecture
+
+```
+Organ-Transplant-System/
+├── backend/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── models.py           # Database models (Donor, Recipient, etc.)
+│   │   ├── schemas.py          # Pydantic schemas for API validation
+│   │   ├── database.py         # Database connection and session management
+│   │   ├── main.py             # FastAPI application entry point
+│   │   ├── crud.py             # Database CRUD operations
+│   │   ├── utils/
+│   │   │   └── matching.py     # Matching algorithm implementation
+│   │   └── routes/
+│   │       ├── donors.py       # Donor management endpoints
+│   │       ├── recipients.py   # Recipient management endpoints
+│   │       ├── match.py        # Matching algorithm endpoints
+│   │       ├── logs.py         # Allocation logging endpoints
+│   │       └── transport.py    # Transport tracking endpoints
+│   └── tests/                  # Unit and integration tests
+├── frontend/                   # React frontend as detailed above
+├── ml-models/                  # Machine learning models for matching
+├── docker-compose.yml          # Container orchestration
+├── .github/                    # CI/CD workflows
+└── README.md                   # Project documentation
+```
+
+## Future Expansion Areas
+
+1. **Advanced Machine Learning Integration:**
+   - Predictive transport time models based on traffic, weather
+   - Improved matching algorithms with more medical factors
+
+2. **Blockchain Integration:**
+   - Full immutable audit trail for allocation decisions
+   - Smart contracts for organ allocation rules
+
+3. **Interoperability:**
+   - FHIR-compliant data exchange with hospital systems
+   - Integration with national organ databases
+
+4. **Reporting and Analytics:**
+   - Advanced dashboards for statistical analysis
+   - Export functionality for research/compliance
+
+5. **Mobile Apps for Different Stakeholders:**
+   - Transport team mobile app
+   - Hospital staff notification app
+   - Administrator oversight app
