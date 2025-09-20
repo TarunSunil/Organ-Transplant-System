@@ -5,6 +5,10 @@ from app import models, schemas, database
 import google.generativeai as genai
 import os
 import json
+from dotenv import load_dotenv
+
+load_dotenv()  # loads variables from .env
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 router = APIRouter()
 
