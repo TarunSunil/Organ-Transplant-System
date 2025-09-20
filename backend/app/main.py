@@ -3,9 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from app import models, database
 from app.routes import donors, recipients, match, logs
 
-# Create tables
-models.Base.metadata.create_all(bind=database.engine)
-
 app = FastAPI(title="Organ Transplant System")
 
 # CORS Middleware
@@ -21,6 +18,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Create tables
+models.Base.metadata.create_all(bind=database.engine)
 # Include routers
 app.include_router(donors.router, prefix="/donors", tags=["Donors"])
 app.include_router(recipients.router, prefix="/recipients", tags=["Recipients"])
