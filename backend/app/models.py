@@ -21,6 +21,7 @@ class Recipient(Base):
     urgency_level = Column(Integer, default=1)
     location = Column(String, nullable=True)
     status = Column(String, default="waiting")
+    age = Column(Integer, nullable=True)
 
 class AllocationLog(Base):
     __tablename__ = "allocation_logs"
