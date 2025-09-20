@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from . import models, database
-from .routes import donors, recipients, match, logs
+from .routes import donors, recipients, match, logs, Dashboard
 
 app = FastAPI(title="Organ Transplant System")
 
@@ -25,3 +25,5 @@ app.include_router(donors.router, prefix="/donors", tags=["Donors"])
 app.include_router(recipients.router, prefix="/recipients", tags=["Recipients"])
 app.include_router(match.router, prefix="/match", tags=["Matching"])
 app.include_router(logs.router, prefix="/logs", tags=["Logs"])
+app.include_router(Dashboard.router, prefix="/dashboard", tags=["Dashboard"])
+

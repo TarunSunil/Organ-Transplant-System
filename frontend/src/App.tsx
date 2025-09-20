@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import DonorManagement from './pages/DonorManagement';
 import RecipientManagement from './pages/RecipientManagement';
 import MatchDonor from './pages/Matchdonor'; // import your match page
+import Logs from "./pages/Logs";
 
 const App: React.FC = () => {
   return (
@@ -12,7 +13,8 @@ const App: React.FC = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/donors" element={<DonorManagement />} />
         <Route path="/recipients" element={<RecipientManagement />} />
-        <Route path="/matching" element={<MatchDonor />} /> {/* add this */}
+        <Route path="/matching" element={<MatchDonor />} />
+        <Route path="/logs" element={<Logs />} />
       </Routes>
     </Router>
   );
