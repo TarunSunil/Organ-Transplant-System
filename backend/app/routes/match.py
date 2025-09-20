@@ -2,8 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
 from app import models, schemas, database
+import google.generativeai as genai
+import os
 
 router = APIRouter()
+
+# Setup Gemini with API Key (set it in your environment variables)
+genai.configure(api_key=os.getenv("AIzaSyBHLhfwDH0mpJL3XaeV1---bU2KJIcTVvs"))
 
 def get_db():
     db = database.SessionLocal()
@@ -12,53 +17,59 @@ def get_db():
     finally:
         db.close()
 
-# --- Blood type compatibility helper ---
-def is_blood_compatible(donor_bt: str, recipient_bt: str) -> bool:
-    compatibility = {
-        "O": ["O", "A", "B", "AB"],   # universal donor
-        "A": ["A", "AB"],
-        "B": ["B", "AB"],
-        "AB": ["AB"]                  # universal recipient
-    }
-    return recipient_bt in compatibility.get(donor_bt, [])
-
-
-# --- Match Donor and Recipient ---
-@router.post("/")
-def match_donor_recipient(donor_id: int, recipient_id: int, db: Session = Depends(get_db)):
+@router.post("/ai-match")
+def ai_match_donor_recipient(donor_id: int, recipient_id: int, db: Session = Depends(get_db)):
     donor = db.query(models.Donor).filter(models.Donor.id == donor_id).first()
     recipient = db.query(models.Recipient).filter(models.Recipient.id == recipient_id).first()
 
     if not donor or not recipient:
         raise HTTPException(status_code=404, detail="Donor or Recipient not found")
 
-    score = 0
+    # Build a prompt for Gemini
+    prompt = f"""
+    You are an AI medical assistant helping with organ transplant matching.
+    Here is the donor and recipient information:
 
-    # Blood type
-    if donor.blood_type == recipient.blood_type:
-        score += 50
-    elif is_blood_compatible(donor.blood_type, recipient.blood_type):
-        score += 30
+    Donor:
+    - Name: {donor.name}
+    - Age: {donor.age}
+    - Blood Type: {donor.blood_type}
+    - Organ: {donor.organ}
+    - Status: {donor.status}
 
-    # Organ match
-    if donor.organ.lower() == recipient.organ_needed.lower():
-        score += 50
+    Recipient:
+    - Name: {recipient.name}
+    - Age: {recipient.age}
+    - Blood Type: {recipient.blood_type}
+    - Organ Needed: {recipient.organ_needed}
+    - Status: {recipient.status}
 
-    # Urgency bonus
-    if hasattr(recipient, "urgency_level") and recipient.urgency_level:
-        score += min(recipient.urgency_level * 10, 50)
+    Task: Based on standard organ transplant practices (blood type compatibility,
+    same organ type, and approximate age compatibility), give me a match score between 0 and 100,
+    and explain briefly why.
+    Return JSON in this format:
+    {{
+      "match_score": <number>,
+      "reason": "<short explanation>"
+    }}
+    """
 
-    # Location bonus
-    if donor.location and recipient.location:
-        if donor.location.lower() == recipient.location.lower():
-            score += 20
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    response = model.generate_content(prompt)
 
-    return {"donor": donor.name, "recipient": recipient.name, "match_score": score}
+    try:
+        ai_output = response.text.strip()
+    except Exception:
+        raise HTTPException(status_code=500, detail="AI did not return a valid response")
 
+    return {
+        "donor": donor.name,
+        "recipient": recipient.name,
+        "ai_match": ai_output
+    }
 
-# --- Allocate Organ ---
-@router.post("/allocate/{donor_id}/{recipient_id}", response_model=schemas.AllocationLog)
-def allocate_organs(donor_id: int, recipient_id: int, db: Session = Depends(get_db)):
+@router.post("/ai-allocate/{donor_id}/{recipient_id}", response_model=schemas.AllocationLog)
+def ai_allocate_organs(donor_id: int, recipient_id: int, db: Session = Depends(get_db)):
     donor = db.query(models.Donor).filter(models.Donor.id == donor_id).first()
     recipient = db.query(models.Recipient).filter(models.Recipient.id == recipient_id).first()
 
@@ -72,21 +83,25 @@ def allocate_organs(donor_id: int, recipient_id: int, db: Session = Depends(get_
     if recipient.status != "waiting":
         raise HTTPException(status_code=400, detail="Recipient not waiting")
 
-    score = 0
-    if donor.blood_type == recipient.blood_type:
-        score += 50
-    elif is_blood_compatible(donor.blood_type, recipient.blood_type):
-        score += 30
+    # Ask Gemini for the match score
+    prompt = f"""
+    Donor: Blood={donor.blood_type}, Organ={donor.organ}, Age={donor.age}
+    Recipient: Blood={recipient.blood_type}, Organ Needed={recipient.organ_needed}, Age={recipient.age}
 
-    if donor.organ.lower() == recipient.organ_needed.lower():
-        score += 50
+    Give a match score (0-100) for transplant compatibility.
+    JSON format only: {{"match_score": <number>}}
+    """
 
-    if hasattr(recipient, "urgency_level") and recipient.urgency_level:
-        score += min(recipient.urgency_level * 10, 50)
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    response = model.generate_content(prompt)
 
-    if donor.location and recipient.location:
-        if donor.location.lower() == recipient.location.lower():
-            score += 20
+    try:
+        ai_output = response.text.strip()
+        import json
+        result = json.loads(ai_output)
+        score = result.get("match_score", 0)
+    except Exception:
+        raise HTTPException(status_code=500, detail="AI output invalid")
 
     donor.status = "allocated"
     recipient.status = "matched"
@@ -102,48 +117,3 @@ def allocate_organs(donor_id: int, recipient_id: int, db: Session = Depends(get_
     db.refresh(log)
 
     return log
-
-
-# --- Find Best Match for a Recipient ---
-@router.get("/best-match/{recipient_id}")
-def best_match(recipient_id: int, db: Session = Depends(get_db)):
-    recipient = db.query(models.Recipient).filter(models.Recipient.id == recipient_id).first()
-    if not recipient:
-        raise HTTPException(status_code=404, detail="Recipient not found")
-
-    available_donors = db.query(models.Donor).filter(models.Donor.status == "available").all()
-    if not available_donors:
-        raise HTTPException(status_code=404, detail="No available donors")
-
-    best_donor = None
-    best_score = -1
-
-    for donor in available_donors:
-        score = 0
-        if donor.blood_type == recipient.blood_type:
-            score += 50
-        elif is_blood_compatible(donor.blood_type, recipient.blood_type):
-            score += 30
-
-        if donor.organ.lower() == recipient.organ_needed.lower():
-            score += 50
-
-        if hasattr(recipient, "urgency_level") and recipient.urgency_level:
-            score += min(recipient.urgency_level * 10, 50)
-
-        if donor.location and recipient.location:
-            if donor.location.lower() == recipient.location.lower():
-                score += 20
-
-        if score > best_score:
-            best_score = score
-            best_donor = donor
-
-    if not best_donor:
-        raise HTTPException(status_code=404, detail="No suitable donor found")
-
-    return {
-        "recipient": recipient.name,
-        "best_donor": best_donor.name,
-        "match_score": best_score
-    }
