@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from app.database import Base
-
+from datetime import datetime
 
 class Donor(Base):
     __tablename__ = "donors"
@@ -30,3 +30,19 @@ class AllocationLog(Base):
     recipient_id = Column(Integer, ForeignKey("recipients.id"))
     match_score = Column(Integer, nullable=False)
     timestamp = Column(DateTime, nullable=False)
+
+
+class TransportLog(Base):
+    __tablename__ = "transport_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    allocation_id = Column(Integer, ForeignKey("allocation_logs.id"))
+    donor_location = Column(String)
+    recipient_location = Column(String)
+    status = Column(String, default="pending")  # pending, in-transit, delivered
+    start_time = Column(DateTime, default=datetime.utcnow)
+    end_time = Column(DateTime, nullable=True)
+
+    # NEW fields for AI logistics
+    estimated_time_minutes = Column(Integer, nullable=True)
+    suggested_route = Column(String, nullable=True)
