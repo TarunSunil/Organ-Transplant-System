@@ -38,7 +38,9 @@ const DonorManagement: React.FC = () => {
       try {
         setIsLoading(true);
         const response = await axios.get<Donor[]>('http://localhost:8000/donors/');
-        setDonors(response.data);
+        // Sort donors by ID in ascending order
+        const sortedDonors = response.data.sort((a: Donor, b: Donor) => a.id - b.id);
+        setDonors(sortedDonors);
       } catch (error) {
         console.error('Error fetching donors:', error);
       } finally {
@@ -71,52 +73,56 @@ const DonorManagement: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'available':
-        return 'bg-medical-green text-white';
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'processing':
-        return 'bg-medical-yellow text-black';
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
       case 'allocated':
-        return 'bg-apple-blue text-white';
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       default:
-        return 'bg-gray-200 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     }
   };
 
   return (
-    <div className="min-h-screen bg-apple-gray">
+    <div className="min-h-screen">
       <div className="flex">
         <Sidebar activeMenu={activeMenu} onMenuSelect={setActiveMenu} />
         <main className="flex-1 p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-semibold">Donor Management</h1>
-            <Button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2">
-              {showForm ? 'Cancel' : '+ Add Donor'}
+          <div className="flex justify-start items-center mb-6">
+            <h1 className="text-3xl font-semibold mr-6 text-apple-dark dark:text-white">Donor Management</h1>
+            <Button 
+              onClick={() => setShowForm(!showForm)} 
+              className="bg-apple-blue text-white hover:bg-blue-600"
+              icon="+"
+            >
+              {showForm ? 'Cancel' : 'Add Donor'}
             </Button>
           </div>
 
           {showForm && (
             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
               <Card>
-                <h2 className="text-xl font-semibold mb-4">Add New Donor</h2>
+                <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Add New Donor</h2>
                 <form onSubmit={handleSubmit}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
                       <input
                         type="text"
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-apple-blue focus:border-transparent"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue focus:border-transparent"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Blood Type</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Blood Type</label>
                       <select
                         name="blood_type"
                         value={formData.blood_type}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-apple-blue focus:border-transparent"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue focus:border-transparent"
                       >
                         {bloodTypes.map(type => (
                           <option key={type} value={type}>{type}</option>
@@ -124,33 +130,33 @@ const DonorManagement: React.FC = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Age</label>
                       <input
                         type="number"
                         name="age"
                         value={formData.age}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-apple-blue focus:border-transparent"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue focus:border-transparent"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
                       <input
                         type="text"
                         name="location"
                         value={formData.location}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-apple-blue focus:border-transparent"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue focus:border-transparent"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Organ</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Organ</label>
                       <select
                         name="organ"
                         value={formData.organ}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-apple-blue focus:border-transparent"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue focus:border-transparent"
                       >
                         {organs.map(organ => (
                           <option key={organ} value={organ}>{organ.charAt(0).toUpperCase() + organ.slice(1)}</option>
@@ -173,32 +179,33 @@ const DonorManagement: React.FC = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead>
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blood Type</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organ</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Blood Type</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Age</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Location</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Organ</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {donors.map((donor) => (
                       <motion.tr 
                         key={donor.id}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.3 }}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-700"
                       >
-                        <td className="px-6 py-4 whitespace-nowrap">{donor.id}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{donor.name}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{donor.blood_type}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{donor.age}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{donor.location}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{donor.organ.charAt(0).toUpperCase() + donor.organ.slice(1)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{donor.id}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{donor.name}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{donor.blood_type}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{donor.age}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{donor.location}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{donor.organ.charAt(0).toUpperCase() + donor.organ.slice(1)}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(donor.status)}`}>
                             {donor.status.charAt(0).toUpperCase() + donor.status.slice(1)}

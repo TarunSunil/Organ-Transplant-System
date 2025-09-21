@@ -29,48 +29,56 @@ const Logs: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchLogs();
   }, []);
 
   return (
-    <div className="min-h-screen flex bg-apple-gray">
+    <div className="min-h-screen flex bg-gray-100 dark:bg-gray-900 transition-colors">
       <Sidebar activeMenu={activeMenu} onMenuSelect={setActiveMenu} />
-
-      <main className="flex-1 p-6">
-        <h1 className="text-2xl font-semibold mb-4">Allocation Logs</h1>
-
-        <Card className="p-4">
-          {loading && <p>Loading logs...</p>}
-          {error && <p className="text-red-600">{error}</p>}
-
-          {!loading && logs.length === 0 && <p>No logs found.</p>}
-
+      <main className="flex-1 p-6 text-gray-900 dark:text-gray-100">
+        <h1 className="text-3xl font-semibold mb-6 text-apple-dark dark:text-white tracking-tight">Allocation Logs</h1>
+        <Card className="bg-white dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700 shadow-sm">
+          {loading && (
+            <div className="flex justify-center items-center h-56">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 dark:border-gray-600 border-t-blue-500"></div>
+            </div>
+          )}
+          {error && (
+            <div className="mb-4 p-4 rounded-md bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm flex gap-2">
+              <span className="text-lg leading-none">⚠️</span>
+              <span className="font-medium">{error}</span>
+            </div>
+          )}
+          {!loading && logs.length === 0 && (
+            <p className="text-center py-10 text-gray-500 dark:text-gray-400">No logs found.</p>
+          )}
           {logs.length > 0 && (
-            <table className="w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-gray-200 text-left">
-                  <th className="border p-2">Log ID</th>
-                  <th className="border p-2">Donor ID</th>
-                  <th className="border p-2">Recipient ID</th>
-                  <th className="border p-2">Match Score</th>
-                  <th className="border p-2">Timestamp</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50">
-                    <td className="border p-2">{log.id}</td>
-                    <td className="border p-2">{log.donor_id}</td>
-                    <td className="border p-2">{log.recipient_id}</td>
-                    <td className="border p-2">{log.match_score}</td>
-                    <td className="border p-2">
-                      {new Date(log.timestamp).toLocaleString()}
-                    </td>
+            <div className="overflow-x-auto mt-2">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-100 dark:bg-gray-700/60">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Log ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Donor ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Recipient ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Match Score</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Timestamp</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  {logs.map((log) => (
+                    <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap font-medium">{log.id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{log.donor_id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{log.recipient_id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{log.match_score}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {new Date(log.timestamp).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </Card>
       </main>

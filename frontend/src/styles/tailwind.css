@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-apple-gray text-apple-dark font-sans;
+    @apply bg-apple-gray dark:bg-gray-900 text-apple-dark dark:text-white font-sans transition-colors duration-300;
   }
 }
 
@@ -14,19 +14,37 @@
   }
   
   .btn-primary {
-    @apply btn bg-apple-blue text-white hover:bg-opacity-90 hover:shadow-apple-hover;
+    @apply btn bg-apple-blue text-white hover:bg-opacity-90 hover:shadow-apple-hover dark:bg-blue-600 dark:hover:bg-blue-700;
   }
   
   .btn-secondary {
-    @apply btn bg-white text-apple-dark border border-gray-300 hover:bg-gray-100 hover:shadow-apple-hover;
+    @apply btn bg-white dark:bg-gray-700 text-apple-dark dark:text-white border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 hover:shadow-apple-hover;
   }
   
   .card {
-    @apply bg-white rounded-xl shadow-apple p-4 transition-shadow duration-300 hover:shadow-apple-hover;
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-apple p-4 transition-all duration-300 hover:shadow-apple-hover border border-gray-100 dark:border-gray-700;
   }
   
   .glass-effect {
-    @apply bg-white bg-opacity-70 backdrop-blur-lg;
+    @apply bg-white bg-opacity-70 backdrop-blur-lg dark:bg-gray-800 dark:bg-opacity-70;
+  }
+
+  /* Dark mode table styles */
+  .table-header {
+    @apply bg-gray-50 dark:bg-gray-700;
+  }
+
+  .table-row {
+    @apply bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700;
+  }
+
+  .table-cell {
+    @apply text-gray-900 dark:text-gray-100;
+  }
+
+  /* Dark mode input styles */
+  .form-input {
+    @apply bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-apple-blue dark:focus:ring-blue-500;
   }
 }
 
@@ -43,4 +61,8 @@
   animation: shimmer 1.5s infinite linear;
   background: linear-gradient(to right, #f6f6f6 8%, #f0f0f0 18%, #f6f6f6 33%);
   background-size: 800px 104px;
+}
+
+.dark .loading-shimmer {
+  background: linear-gradient(to right, #374151 8%, #4b5563 18%, #374151 33%);
 }

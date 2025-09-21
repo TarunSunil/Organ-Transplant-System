@@ -23,9 +23,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeMenu, onMenuSelect }) => {
   };
 
   return (
-    <aside className="bg-white w-64 min-h-screen shadow-md">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-apple-dark">Organ Transplant System</h2>
+    <aside className="bg-white dark:bg-gray-800 w-64 min-h-screen shadow-md transition-colors duration-300">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-xl font-semibold text-apple-dark dark:text-white">Organ Transplant System</h2>
       </div>
       <nav className="p-2">
         <ul>
@@ -33,10 +33,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeMenu, onMenuSelect }) => {
             <li key={item.id} className="mb-1">
               <Link
                 to={item.path}
-                className={`w-full text-left p-3 rounded-lg flex items-center ${
+                className={`w-full text-left p-3 rounded-lg flex items-center transition-colors duration-200 ${
                   isActive(item.path)
-                    ? 'bg-apple-blue bg-opacity-10 text-apple-blue'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    ? 'bg-apple-blue bg-opacity-10 text-apple-blue dark:bg-blue-600 dark:bg-opacity-20 dark:text-blue-400'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
                 onClick={() => onMenuSelect(item.id)}
               >

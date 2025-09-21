@@ -47,26 +47,27 @@ const MatchDonor: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-apple-gray">
+    <div className="min-h-screen flex bg-gray-100 dark:bg-gray-900 transition-colors">
       <Sidebar activeMenu={activeMenu} onMenuSelect={setActiveMenu} />
+      <main className="flex-1 p-6 text-gray-900 dark:text-gray-100">
+        <h1 className="text-3xl font-semibold mb-6 text-apple-dark dark:text-white tracking-tight">AI Donor-Recipient Match</h1>
 
-      <main className="flex-1 p-6">
-        <h1 className="text-2xl font-semibold mb-4">AI Donor-Recipient Match</h1>
-
-        <Card className="p-4 mb-6">
-          <div className="flex flex-col gap-4">
-            <input
-              type="number"
-              placeholder="Enter Donor ID"
-              value={donorId}
-              onChange={(e) => setDonorId(e.target.value)}
-              className="border p-2 rounded"
-            />
-
+        <Card className="p-5 mb-6 bg-white dark:bg-gray-800/70 backdrop-blur border border-gray-200 dark:border-gray-700 shadow-sm">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end">
+            <div className="flex flex-col flex-1">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Donor ID</label>
+              <input
+                type="number"
+                placeholder="Enter Donor ID"
+                value={donorId}
+                onChange={(e) => setDonorId(e.target.value)}
+                className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700/60 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              />
+            </div>
             <button
               onClick={handleMatch}
-              disabled={loading}
-              className="bg-apple-blue text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+              disabled={loading || !donorId}
+              className="inline-flex items-center justify-center px-5 py-2.5 rounded-md font-medium bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white shadow-sm transition-colors"
             >
               {loading ? "Matching..." : "Match Donor"}
             </button>
@@ -74,48 +75,49 @@ const MatchDonor: React.FC = () => {
         </Card>
 
         {error && (
-          <div className="text-red-600 font-medium mb-4">
-            ⚠️ {error}
+          <div className="mb-4 p-4 rounded-md bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm flex items-start gap-2">
+            <span className="text-lg leading-none">⚠️</span>
+            <span className="font-medium">{error}</span>
           </div>
         )}
 
         {result && (
-  <Card className="p-4">
-    <h2 className="text-xl font-semibold mb-2">Match Result</h2>
-    <p><strong>Donor:</strong> {result.donor}</p>
-    <p><strong>Recipient:</strong> {result.recipient}</p>
+          <div className="flex justify-center">
+            <Card className="p-6 max-w-2xl w-full bg-white dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Match Result</h2>
+              <div className="space-y-2 text-sm">
+                <p><span className="font-medium text-gray-700 dark:text-gray-300">Donor:</span> {result.donor}</p>
+                <p><span className="font-medium text-gray-700 dark:text-gray-300">Recipient:</span> {result.recipient}</p>
+              </div>
 
-    {(() => {
-      let matchData = null;
-      if (typeof result.ai_match === "string") {
-        try {
-          // Remove backticks and 'json' if present
-          const cleaned = result.ai_match
-            .replace(/```json/g, "")
-            .replace(/```/g, "")
-            .trim();
-          matchData = JSON.parse(cleaned);
-        } catch {
-          matchData = null;
-        }
-      } else if (typeof result.ai_match === "object") {
-        matchData = result.ai_match;
-      }
+              {(() => {
+                let matchData = null;
+                if (typeof result.ai_match === "string") {
+                  try {
+                    const cleaned = result.ai_match
+                      .replace(/```json/g, "")
+                      .replace(/```/g, "")
+                      .trim();
+                    matchData = JSON.parse(cleaned);
+                  } catch {
+                    matchData = null;
+                  }
+                } else if (typeof result.ai_match === "object") {
+                  matchData = result.ai_match;
+                }
 
-      return matchData ? (
-        <div className="mt-2 p-4 bg-gray-50 rounded shadow-sm">
-          <p className="text-lg"><strong>Match Score:</strong> {matchData.match_score}</p>
-          <p className="mt-1"><strong>Reason:</strong> {matchData.reason}</p>
-        </div>
-      ) : (
-        <p className="mt-2">{result.ai_match}</p>
-      );
-    })()}
-  </Card>
-)}
-
-
-
+                return matchData ? (
+                  <div className="mt-4 p-4 rounded-md bg-gray-50 dark:bg-gray-700/60 border border-gray-200 dark:border-gray-600">
+                    <p className="text-lg font-semibold text-gray-900 dark:text-gray-100"><span className="font-medium">Match Score:</span> {matchData.match_score}</p>
+                    <p className="mt-1 text-sm text-gray-700 dark:text-gray-300"><span className="font-medium">Reason:</span> {matchData.reason}</p>
+                  </div>
+                ) : (
+                  <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">{result.ai_match}</p>
+                );
+              })()}
+            </Card>
+          </div>
+        )}
       </main>
     </div>
   );
