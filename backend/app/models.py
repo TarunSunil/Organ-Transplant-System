@@ -1,6 +1,8 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
 from app.database import Base
 from datetime import datetime
+
+
 
 class Donor(Base):
     __tablename__ = "donors"
@@ -8,16 +10,18 @@ class Donor(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     blood_type = Column(String, index=True)
+    organ = Column(String, nullable=False)
     age = Column(Integer)
-    location = Column(String, nullable=True)  # ✅ add this line
-    organ = Column(String, index=True)
+    location = Column(String, nullable=True)
     status = Column(String, default="available")
+
 class Recipient(Base):
     __tablename__ = "recipients"
+
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     blood_type = Column(String, nullable=False)
-    organ_needed = Column(String, nullable=False)   # 👈 important
+    organ_needed = Column(String, nullable=False)
     urgency_level = Column(Integer, default=1)
     location = Column(String, nullable=True)
     status = Column(String, default="waiting")
@@ -25,6 +29,7 @@ class Recipient(Base):
 
 class AllocationLog(Base):
     __tablename__ = "allocation_logs"
+
     id = Column(Integer, primary_key=True, index=True)
     donor_id = Column(Integer, ForeignKey("donors.id"))
     recipient_id = Column(Integer, ForeignKey("recipients.id"))

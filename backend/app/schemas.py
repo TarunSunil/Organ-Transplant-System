@@ -52,7 +52,6 @@ class AllocationLog(BaseModel):
     class Config:
         from_attributes = True
 
-
 # Base schema for TransportLog
 class TransportLogBase(BaseModel):
     allocation_id: int

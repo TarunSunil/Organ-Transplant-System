@@ -1,11 +1,10 @@
-# app/routes/transport.py
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
 from app import models, database, schemas
 import google.generativeai as genai
 import os
+import json
 from dotenv import load_dotenv
 load_dotenv()
 router = APIRouter()
@@ -20,7 +19,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
 
 # --- Start Transport with AI ETA & Route ---
 @router.post("/start/{allocation_id}", response_model=schemas.TransportLog)
@@ -48,10 +46,8 @@ def start_transport_ai(allocation_id: int, db: Session = Depends(get_db)):
     Donor Location: {donor.location}
     Recipient Location: {recipient.location}
 
-    Consider speed, safety, and urgency. Give me:
-    - Estimated transport time in minutes
-    - Suggested route as text
-    Return JSON in this format:
+    Consider speed, safety, and urgency.
+    Return ONLY valid JSON in this format, with no explanation or code block markers:
     {{
         "eta_minutes": <number>,
         "route": "<text description>"
@@ -62,12 +58,20 @@ def start_transport_ai(allocation_id: int, db: Session = Depends(get_db)):
     response = model.generate_content(prompt)
 
     try:
-        import json
         ai_output = response.text.strip()
+        # Remove code block markers if present
+        if ai_output.startswith("```json"):
+            ai_output = ai_output.replace("```json", "").replace("```", "").strip()
+        elif ai_output.startswith("```"):
+            ai_output = ai_output.replace("```", "").strip()
+        # Log raw output for debugging
+        print("AI raw output:", ai_output)
         result = json.loads(ai_output)
         eta = result.get("eta_minutes", 60)  # default to 60 min
         route = result.get("route", "No route suggested")
-    except Exception:
+    except Exception as e:
+        print("AI output parsing error:", e)
+        print("Full AI output:", response.text)
         raise HTTPException(status_code=500, detail="AI output invalid")
 
     transport = models.TransportLog(
@@ -84,7 +88,6 @@ def start_transport_ai(allocation_id: int, db: Session = Depends(get_db)):
     db.refresh(transport)
     return transport
 
-
 # --- Complete Transport ---
 @router.post("/complete/{transport_id}", response_model=schemas.TransportLog)
 def complete_transport(transport_id: int, db: Session = Depends(get_db)):
@@ -100,7 +103,6 @@ def complete_transport(transport_id: int, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(transport)
     return transport
-
 
 # --- Get All Transports ---
 @router.get("/", response_model=list[schemas.TransportLog])

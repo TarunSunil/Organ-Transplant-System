@@ -6,15 +6,11 @@ import google.generativeai as genai
 import os
 import json
 from dotenv import load_dotenv
-
-load_dotenv()  # loads variables from .env
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-
+load_dotenv()
 router = APIRouter()
 
 # Setup Gemini with API Key (set it in your environment variables)
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-
 def get_db():
     db = database.SessionLocal()
     try:
