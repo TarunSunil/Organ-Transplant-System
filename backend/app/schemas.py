@@ -51,3 +51,25 @@ class AllocationLog(BaseModel):
 
     class Config:
         from_attributes = True
+
+# Base schema for TransportLog
+class TransportLogBase(BaseModel):
+    allocation_id: int
+    donor_location: str
+    recipient_location: str
+    status: str
+    estimated_time_minutes: int
+    suggested_route: str
+
+# Schema used when creating a new transport
+class TransportLogCreate(TransportLogBase):
+    pass
+
+# Schema used for API responses
+class TransportLog(TransportLogBase):
+    id: int
+    start_time: datetime
+    end_time: datetime | None = None  # end_time can be null if transport is ongoing
+
+    class Config:
+        from_attributes = True
