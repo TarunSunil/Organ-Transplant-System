@@ -73,3 +73,22 @@ class TransportLog(TransportLogBase):
 
     class Config:
         from_attributes = True
+
+# ---------------------------
+# Matching / AI response models
+# ---------------------------
+class TopMatch(BaseModel):
+    recipient_id: int
+    recipient_name: str
+    match_score: int
+    reason: str | None = None
+    blood_type: str | None = None
+    organ_needed: str | None = None
+    urgency_level: int | None = None
+    location: str | None = None
+
+class AIMatchResponse(BaseModel):
+    donor: str
+    recipient: str | None
+    ai_match: dict | str
+    top_matches: list[TopMatch]

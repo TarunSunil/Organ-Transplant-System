@@ -23,7 +23,15 @@ const Dashboard: React.FC = () => {
       const statsRes = await axios.get('http://127.0.0.1:8000/dashboard/stats');
       const matchesRes = await axios.get('http://127.0.0.1:8000/dashboard/recent-matches');
       setStats(statsRes.data);
-      setRecentMatches(matchesRes.data);
+      // Normalize match objects to ensure expected keys exist
+      const normalized = (matchesRes.data || []).map((m: any) => ({
+        id: m.id,
+        donor: m.donor || m.donor_name || 'Unknown Donor',
+        recipient: m.recipient || m.recipient_name || 'Unknown Recipient',
+        score: typeof m.score === 'number' ? m.score : (typeof m.match_score === 'number' ? m.match_score : 0),
+        time: m.time || m.timestamp || m.created_at || new Date().toISOString()
+      }));
+      setRecentMatches(normalized);
     } catch (error) {
       console.error("Error fetching dashboard data", error);
     } finally {
@@ -67,14 +75,8 @@ const Dashboard: React.FC = () => {
     <div className="min-h-screen flex bg-gray-100 dark:bg-gray-900 transition-colors">
       <Sidebar activeMenu={activeMenu} onMenuSelect={setActiveMenu} />
       <main className="flex-1 p-6 text-gray-900 dark:text-gray-100">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-start items-center mb-8">
           <h1 className="text-3xl font-semibold text-apple-dark dark:text-white tracking-tight">Dashboard</h1>
-          <button
-            onClick={fetchDashboardData}
-            className="inline-flex items-center px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition disabled:opacity-50"
-          >
-            Refresh
-          </button>
         </div>
 
         {/* Stats cards */}

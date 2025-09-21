@@ -38,7 +38,7 @@ const MatchDonor: React.FC = () => {
         // keep as string if parsing fails
       }
 
-      setResult({ ...data, ai_match: parsedMatch });
+  setResult({ ...data, ai_match: parsedMatch });
     } catch (err: any) {
       setError(err.message || "Something went wrong");
     } finally {
@@ -82,22 +82,18 @@ const MatchDonor: React.FC = () => {
         )}
 
         {result && (
-          <div className="flex justify-center">
+          <div className="flex flex-col gap-6 items-center">
             <Card className="p-6 max-w-2xl w-full bg-white dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Match Result</h2>
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Best Allocation Result</h2>
               <div className="space-y-2 text-sm">
                 <p><span className="font-medium text-gray-700 dark:text-gray-300">Donor:</span> {result.donor}</p>
-                <p><span className="font-medium text-gray-700 dark:text-gray-300">Recipient:</span> {result.recipient}</p>
+                <p><span className="font-medium text-gray-700 dark:text-gray-300">Selected Recipient:</span> {result.recipient ?? '—'}</p>
               </div>
-
               {(() => {
                 let matchData = null;
                 if (typeof result.ai_match === "string") {
                   try {
-                    const cleaned = result.ai_match
-                      .replace(/```json/g, "")
-                      .replace(/```/g, "")
-                      .trim();
+                    const cleaned = result.ai_match.replace(/```json/g, "").replace(/```/g, "").trim();
                     matchData = JSON.parse(cleaned);
                   } catch {
                     matchData = null;
@@ -105,17 +101,54 @@ const MatchDonor: React.FC = () => {
                 } else if (typeof result.ai_match === "object") {
                   matchData = result.ai_match;
                 }
-
-                return matchData ? (
+                return matchData && matchData.match_score ? (
                   <div className="mt-4 p-4 rounded-md bg-gray-50 dark:bg-gray-700/60 border border-gray-200 dark:border-gray-600">
                     <p className="text-lg font-semibold text-gray-900 dark:text-gray-100"><span className="font-medium">Match Score:</span> {matchData.match_score}</p>
-                    <p className="mt-1 text-sm text-gray-700 dark:text-gray-300"><span className="font-medium">Reason:</span> {matchData.reason}</p>
+                    {matchData.reason && <p className="mt-1 text-sm text-gray-700 dark:text-gray-300"><span className="font-medium">Reason:</span> {matchData.reason}</p>}
                   </div>
                 ) : (
-                  <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">{result.ai_match}</p>
+                  <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">{typeof result.ai_match === 'string' ? result.ai_match : 'No detailed score available.'}</p>
                 );
               })()}
             </Card>
+
+            {Array.isArray(result.top_matches) && result.top_matches.length > 0 && (
+              <Card className="p-6 max-w-3xl w-full bg-white dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Top 3 Candidate Matches</h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+                    <thead className="bg-gray-100 dark:bg-gray-700/60">
+                      <tr>
+                        <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-300">Rank</th>
+                        <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-300">Recipient</th>
+                        <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-300">Score</th>
+                        <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-300">Reason</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                      {result.top_matches.map((m: any, idx: number) => (
+                        <tr key={m.recipient_id} className="hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors align-top">
+                          <td className="px-4 py-2 font-medium">{idx + 1}</td>
+                          <td className="px-4 py-2">
+                            <div className="font-medium text-gray-900 dark:text-gray-100">{m.recipient_name}</div>
+                            <div className="mt-1 text-xs text-gray-600 dark:text-gray-400 space-x-2">
+                              {m.blood_type && <span>Blood: <span className="font-semibold">{m.blood_type}</span></span>}
+                              {m.organ_needed && <span>Organ: <span className="font-semibold">{m.organ_needed}</span></span>}
+                              {typeof m.urgency_level === 'number' && <span>Urgency: <span className="font-semibold">{m.urgency_level}</span></span>}
+                              {m.location && <span>Loc: <span className="font-semibold">{m.location}</span></span>}
+                            </div>
+                          </td>
+                          <td className="px-4 py-2">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${m.match_score > 90 ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300'}`}>{m.match_score}</span>
+                          </td>
+                          <td className="px-4 py-2 text-gray-600 dark:text-gray-300 max-w-sm truncate" title={m.reason}>{m.reason || '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            )}
           </div>
         )}
       </main>
